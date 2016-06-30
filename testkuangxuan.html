@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>multiple select</title>
+
+<style type="text/css">
+body {
+    margin:10px;
+    padding:0;
+}
+</style>
+<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.8.2r1/build/fonts/fonts-min.css" />
+<script type="text/javascript" src="http://yui.yahooapis.com/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.8.2r1/build/selector/selector-min.js"></script>
+
+
+<style type="text/css">
+
+.multipleSelect{
+      background:#F2AE1C;
+}
+
+.mylist {
+    position: relative;
+    width: 350px;
+    height:500px;
+    background: #f7f7f7;
+    border: 1px solid gray;
+    list-style: none;
+    margin:0;
+    padding:0;
+}
+
+.mylist li{
+    padding-left:10px;
+    margin: 5px;
+    cursor: pointer;
+    zoom: 1;
+    border:1px solid #7EA6B2;
+    font-size:35px;
+}
+</style>
+
+
+
+</head>
+
+<body >
+
+
+<h1>multiple select</h1>
+
+
+<div id="test">
+   <ul >
+    <li>item 1</li>
+    <li>item 2</li>
+    <li>item 3</li>
+    <li>item 4</li>
+    <li>item 5</li>
+    <li>item 6</li>
+    <li>item 7</li>
+    <li>item 8</li>
+    <li>item 9</li>
+  </ul>
+</div>
+
+
+<script>
+
+function multipleSelect(){
+    //对每个li注册click事件
+    var lis = YAHOO.util.Selector.query('#test ul li');
+    for(var i in lis){
+        var li = lis[i];
+        YAHOO.util.Event.addListener(li,'click',clickLi,li);
+    }
+}
+
+function clickLi(e){
+    //最关键的一步 确定shift 和 ctrl 是否被按住
+    var bSHIFT = e.shiftKey;
+    var bCTRL = e.ctrlKey;
+    //如果ctrl 为 true
+    if(bCTRL){
+        YAHOO.util.Dom.addClass(this,'multipleSelect');
+    }
+    //如果shift 为 true
+    if(bSHIFT){        
+        
+        YAHOO.util.Dom.addClass(this,'multipleSelect');
+        
+        var allNodes =  YAHOO.util.Selector.query('ul li',this.parent);
+        
+        var nodes = [];
+        
+        var nextSiblingNode = YAHOO.util.Dom.getNextSibling(this);
+        
+        while(nextSiblingNode){
+            nodes.push(this);
+            nodes.push(nextSiblingNode);
+            if(YAHOO.util.Dom.hasClass(nextSiblingNode,'multipleSelect')){
+                YAHOO.util.Dom.removeClass(allNodes,'multipleSelect');    
+                YAHOO.util.Dom.addClass(nodes,'multipleSelect');
+                return;
+            }
+            nextSiblingNode = YAHOO.util.Dom.getNextSibling(nextSiblingNode);
+        }
+    
+        
+        nodes = [];
+        
+        var previousSiblingNode = YAHOO.util.Dom.getPreviousSibling(this);
+        
+        while(previousSiblingNode){
+            nodes.push(this);
+            nodes.push(previousSiblingNode);
+            if(YAHOO.util.Dom.hasClass(previousSiblingNode,'multipleSelect')){
+                YAHOO.util.Dom.removeClass(allNodes,'multipleSelect');
+                YAHOO.util.Dom.addClass(nodes,'multipleSelect');
+                return;
+            }
+            previousSiblingNode = YAHOO.util.Dom.getPreviousSibling(previousSiblingNode);
+        }
+        
+        
+    }
+    //shift 和 ctril 都为 false 时
+    if((!bCTRL)&&(!bSHIFT)){
+        YAHOO.util.Dom.removeClass(YAHOO.util.Selector.query('#test ul li'),'multipleSelect');
+        YAHOO.util.Dom.addClass(this,'multipleSelect');    
+    }
+}
+
+multipleSelect();
+</script>
+</body>
+</html>

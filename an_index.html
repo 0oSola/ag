@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>ag_index</title>
+</head>
+<body ng-app="myapp">
+	<div ng-controller="parentController">
+		<div ng-controller="childController">
+			<input type="text" ng-model="person.name" placeholder="test input"/>
+			<p>{{person}}</p>
+			<a ng-click="sayHello();">test</a>
+		</div>
+	</div>
+	<div ng-controller="clockController">
+		<p>{{clock}}</p>
+	</div>
+		
+	<div ng-controller="PlayController" style="display:none">
+		{{ programs }}
+	</div>
+	
+	<!--service program-->
+	<div ng-controller="serviceController">
+		<input ng-model="username" placeholder="enter username"/>
+		<pre ng-show="username">{{events}}</pre>
+	</div>
+	<!--end service program-->
+
+	<!--promise program-->
+	<div ng-controller="promiseController">
+		<pre>{{result}}</pre>
+	</div>
+	<!--end promise program-->
+	
+	<div ng-controller="directiveController">
+		<input type="text" ng-model='admin'/>
+		<div form-directive btn-click="clickMessage(message)"></div>
+		{{peopleList | json}}
+		<p>可修改scope:</p>
+		<div ng-repeat="person in peopleList">
+			<div people info="person"></div>
+		</div>
+		<p>只读scope：</p>
+		<div ng-repeat="person in peopleList">
+			<div people-two username="{{person.username}}"></div>
+		</div>
+	</div>
+
+
+
+</body>
+<script type="text/javascript" src="js/angular/angular.js"></script>
+<script type="text/javascript">
+	var app = angular.module("myapp",[]);
+	app.controller("parentController",function($scope){
+		$scope.person = {"greeted":false}
+	})
+	app.controller("childController",function($scope){
+		$scope.sayHello = function(){
+			$scope.person.greeted = true;
+		}
+	})
+	app.controller("clockController",function($scope){
+		var updateClock = function(){
+			$scope.clock = new Date();
+		}
+		var timer = setInterval(function(){
+			$scope.$apply((updateClock()));
+		},1000)
+		updateClock();
+	})
+
+	var apiKey = 'MDI0NzQ4NTkwMDE0NjU4NzUwMTBiZmNkZg000',
+    nprUrl = 'http://api.npr.org/query?id=61&fields=relatedLink,title,byline,text,audio,image,pullQuote,all&output=JSON';
+
+    app.controller('PlayController',function($scope,$http){
+    	$http({
+			method:"JSONP",
+			url: nprUrl + '&apiKey=' + apiKey + '&callback=JSON_CALLBACK'
+		}).success(function(data, status){
+			$scope.programs = data.list.story;
+		}).error(function(data, status){
+
+		})
+    })
+
+
+    //service factory 单例
+    app.factory('myFactory',['$http',function($http){
+    	var githubName;
+    	var doRequest = function(username,path){
+    		return $http({
+    			method:"JSONP",
+    			url:'https://api.github.com/users/' + username + '/' + path + '?callback=JSON_CALLBACK'
+    		});
+    	}
+
+    	return {
+    		search:function(username){return doRequest(username,'events')},
+    		setgithubName:function(username){
+    			githubName = username;
+    		}
+    	}
+    }]);
+
+    //or
+    app.factory('myFactory2',['$http',function($http){
+    	var service = {
+    		doRequest:function(username){
+    			return $http({
+	    			method:"JSONP",
+	    			url:'https://api.github.com/users/' + username + '/events?callback=JSON_CALLBACK'
+	    		});
+    		}
+    	}
+    	return service;
+    }])
+
+    /*app.controller("serviceController",['$scope','myFactory',function($scope,myFactory){
+    	$scope.$watch("username",function(newuserName){
+    		myFactory.search(newuserName).success(function(data,status,header){
+    			console.log(status);
+    			if(status==200){
+    				$scope.events = data.data;
+    			}
+    		})
+    	})
+    }]);*/
+
+    app.controller("serviceController",['$scope','myFactory2',function($scope,myFactory2){
+    	$scope.$watch("username",function(newuserName){
+    		myFactory2.doRequest(newuserName).success(function(data,status,header){
+    			console.log(status);
+    			if(status==200){
+    				$scope.events = data.data;
+    			}
+    		})
+    	})
+    }]);
+
+	//end service factory
+
+	//service service
+	app.service('myService',function($http){
+		this.doRequest = function(username,path){
+			return $http({
+    			method:"JSONP",
+    			url:'https://api.github.com/users/' + username + '/' + path + '?callback=JSON_CALLBACK'
+    		});
+		}
+	});
+
+	/*app.controller("serviceController",['$scope','myService',function($scope,myService){
+    	$scope.$watch("username",function(newuserName){
+    		myService.doRequest(newuserName,'events').success(function(data,status){
+	    		console.log(status);
+				if(status==200){
+					$scope.events = data.data;
+				}
+	    	})
+    	})
+    }]);*/
+	//end service
+
+	//service provider
+	app.provider('myProvider',function(){
+		var username = '';
+		this.setUserName = function(newName){
+			if(newName) this.username = newName;
+		}
+		this.$get = function($http){
+			var service = {
+				doRequest:function(username,path){
+					return $http({
+						method:'JSONP',
+						url:'https://api.github.com/users/' + username + '/' + path + '?callback=JSON_CALLBACK'
+					})
+				}
+			}
+			return service;
+		}	
+	})
+
+	app.config(function(myProviderProvider){
+		myProviderProvider.setUserName('0osola');
+	})
+
+	/*app.controller('serviceController',['$scope','myProvider',function($scope,myProvider){
+		$scope.$watch('username',function(newuserName){
+			myProvider.doRequest(newuserName,'events').success(function(data,status){
+				console.log(status);
+				if(status==200){
+					$scope.events = data.data;
+				}
+			})
+		})
+	}]);*/
+
+	//end provider
+
+	//test promise   
+	function getData($q,$timeout){
+		var defer = $q.defer();
+		$timeout(function(){
+			if(Math.round(Math.random())){
+				defer.resolve("success!!");
+			}else{
+				defer.reject("error!!");
+			}
+		},2000);
+		return defer.promise;
+	}
+
+	function getData2($q,$timeout){
+		var defer = $q.defer();
+		$timeout(function(){
+			if(Math.round(Math.random())){
+				defer.resolve('success2');
+			}else{
+				defer.reject("error2")
+			}
+		})
+		return defer.promise;
+	}
+
+	app.controller('promiseController',['$scope','$q','$timeout',function($scope,$q,$timeout){
+
+		$q.all([getData($q,$timeout),getData2($q,$timeout)]).then(function(data){
+			console.log("$q all success:"+data+",length:"+data.length)
+		},function(error){
+			console.log("$q all error:"+error)
+		}).finally(function(){
+			console.log(111244);
+		})
+
+		getData($q,$timeout).then(function(data){
+			console.log(data);
+			$scope.result = data;
+		},function(error){
+			$scope.result = error;
+		}).finally(function(){
+			console.log(111244);
+		})
+
+		getData($q,$timeout).then(function(data){
+			num = 1;
+			console.log(num);
+			return $q.reject(2);
+		}).catch(function(num){
+			console.log(num);
+			return num+1;
+		}).then(function(num){
+			console.log(num*11);
+		})
+
+	}])
+	//end promise
+
+
+	//directive
+	app.controller('directiveController',function($scope){
+		$scope.peopleList = [
+			{
+				username:"Test1",
+				request:1
+			},
+			{
+				username:"Lsit",
+				request:1
+			}
+		];
+		$scope.admin = 'sola';
+		$scope.clickMessage = function(msg){
+			console.log("click!!!"+msg);
+		}
+	})
+
+	//=可改变对象
+	app.directive('people',function(){
+		return {
+			restrict:"A",
+			scope:{
+				info:"="
+			},
+			template:'<p><input type="text" ng-model="info.username"/></p>'
+		}
+	})
+
+	//@只读  不会改变scope的值
+	app.directive('peopleTwo',function(){
+		return {
+			restrict:"A",
+			scope:{
+				username:"@"
+			},
+			template:'<p><input type="text" ng-model="username"/></p>'
+		}
+	})
+
+	//& 调用回调函数
+	app.directive('formDirective',function(){
+		return {
+			restrict:'A',
+			scope:{
+				btnClick:'&'
+			},
+			//message:value  传入input参数
+			template:'<p><input type="text" ng-model="value"/><input type="button" value="click!" ng-click="btnClick({message:value})"/><p>'
+		}
+	})
+
+	app.controller('formDirective2',function(){
+		return {
+			restrict:'A',
+			templateUrl:'<input type="text" ng-model="value"/><ul><li>{{nussage}}</li></ul>'
+		}
+	})
+
+	//end directive
+</script>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>player</title>
+</head>
+<body ng-app="myapp">
+	<div ng-controller='playerController'>
+		{{programs}}
+	</div>
+</body>
+<script type="text/javascript" src='js/angular/angular.js'></script>
+<script type="text/javascript">
+	var apiKey = 'MDI0NzQ4NTkwMDE0NjU4NzUwMTBiZmNkZg000',
+    nprUrl = 'http://api.npr.org/query?id=61&fields=relatedLink,title,byline,text,audio,image,pullQuote,all&output=JSON';
+
+	var myapp = angular.module('myapp',[]);
+
+	myapp.service('nprService',function(){
+		this.doRequest = function(){
+			return $http({
+				method:'JSONP',
+				url: nprUrl + '&apiKey=' + apiKey + '&callback=JSON_CALLBACK'
+			}).success(function(data,status){
+				if(status==200){
+					$scope.programs = data.list.story;
+				}
+			}).error(function(status){
+				console.log(status);
+			})
+		}
+	})
+
+	myapp.factory('audio',function($scope,$document){
+		var audio = $document.createElement('audio');
+		return audio;
+	})
+
+
+
+	myapp.controller('playerController',['audio','nprService','$scope',function(audio,nprService,$scope){
+		$scope.audio = audio;
+		var player = {
+			playing:false,
+			current:null,
+			ready:false,
+
+			play:function(program){
+				if(player.playing){
+					player.stop();
+				}
+				var url = program.audio.format.mp4.$text;
+				player.current = program;
+				audio.src = url;
+				audio.play();
+				player.playing = true;
+			},
+			stop:function(){
+
+			}
+
+		};
+	}])
+</script>
+</html>
