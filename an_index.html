@@ -310,7 +310,12 @@
 		}
 	})
 
-
+	app.controller('formDirective2',function(){
+		return {
+			restrict:'A',
+			templateUrl:'<input type="text" ng-model="value"/><ul><li>{{nussage}}</li></ul>'
+		}
+	})
 
 	//end directive
 </script>
