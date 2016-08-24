@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>scope</title>
+</head>
+<body ng-app="scopeApp">
+	<div ng-controller="parentController">
+		<p ng-bind="location"></p>
+		<button ng-click="call();">call</button>
+		
+		<div ng-controller="childController">
+			<p ng-bind="location"></p>
+			<button ng-click="tell();">tell</button>
+		</div>
+		<div ng-controller="childController2">
+			<p ng-bind="location"></p>
+			<button ng-click="tell2();">tell2</button>
+		</div>
+	</div>
+
+</body>
+<script type="text/javascript" src="../js/angular/angular.min.js"></script>
+<script type="text/javascript">
+	angular.module("scopeApp",[]).controller("parentController",["$scope",function($scope){
+
+		$scope.$on("changeLocationFC",function(event,msg){
+			console.log("parent",msg);
+			$scope.location = msg;
+			$scope.$broadcast("changeLocationFP",msg);
+		})
+
+		$scope.call = function(){
+			$scope.location = "call parent";
+			$scope.$broadcast("changeLocationFP",$scope.location);
+		}
+
+	}]).controller("childController",["$scope",function($scope){
+		
+		$scope.$on("changeLocationFP",function(event,msg){
+			console.log("child",msg);
+			$scope.location = msg;
+		})
+
+		$scope.tell = function(){
+			$scope.location = "tell parent";
+			$scope.$emit("changeLocationFC",$scope.location);
+		}
+
+	}]).controller("childController2",function($scope){
+		
+		$scope.$on("changeLocationFP",function(event,msg){
+			$scope.location = msg;
+		});
+
+		$scope.tell2 = function(){
+			$scope.location = "tell parent2";
+			$scope.$emit("changeLocationFC",$scope.location);
+		}
+
+	})
+
+</script>
+</html>

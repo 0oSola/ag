@@ -5,6 +5,12 @@
 	<title>detail</title>
 </head>
 <body>
-	Detail1234
+	<button ng-click="add();">添加</button>
+	<div ng-repeat="l in list">
+		<div>
+			<input type="text" ng-model="l.name"/><button ng-click="delete($index);">删除</button>
+			<p ng-bind="l.id"></p>
+		</div>
+	</div>
 </body>
 </html>
