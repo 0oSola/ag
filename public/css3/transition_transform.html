@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<style type="text/css">
+	.input-box{
+		position: relative;
+	}
+	.box-focus label{
+		z-index: 1;
+		position: absolute;
+		transform: translate3d(0,4px,0) scale(.67);
+	}
+	label{
+		transform: translate3d(0,28px,0) scale(1);
+		transition-duration: 0.4s;
+		transition-property: transform;
+		transition-timing-function: cubic-bezier(.25,.8,.25,1);
+		z-index: 1;
+		position: absolute;
+	}
+	.md-input{
+		margin-top:28px;
+		z-index: 0;
+		border:0;
+		border-bottom:2px solid;
+		border-bottom-color: #eee;
+		transition-duration: 0.4s;
+		transition-property: border-bottom-color;
+		transition-timing-function: cubic-bezier(.25,.8,.25,.1);
+		outline: none;
+	}
+
+	.focusbar{
+		width:0;
+		bottom:0;
+		position: absolute;
+		height: 3px;
+		transition-property:width;
+		transition-duration: 0.4s;
+		transition-timing-function:ease-in-out;
+	}
+	.box-focus .focusbar{
+		width: 150px;
+		border-bottom-width: 1px;
+		border-bottom-width: 3px;
+		border-bottom-color:rgb(56,153,236);
+		border-bottom-style: solid;
+	}
+
+	/* modal css */
+	.modal{
+		position: absolute;
+		visibility: hidden;
+		opacity: 0;
+		width: 30px;
+		height: 30px;
+		background: #eee;
+		border: 1px solid #eee;
+		transform: scale(0,0);
+		transition-delay: 0.3s;
+		transition-duration: 0.4s;
+		transition-property: all;
+		transition-timing-function: ease-in-out;
+	}
+
+	.show{
+		visibility: visible;
+		opacity: 1;
+		transform: scale(1,1);
+	}
+
+</style>
+<body>
+	<div class="modal"></div>
+	<div class="input-box">
+		<label for="">name</label>
+		<input type="text" class="md-input"/>
+		<div class="focusbar"></div>
+	</div>
+	<button id="modal">弹出</button>
+
+</body>
+<script type="text/javascript" src="../static/js/jquery/jquery-2.1.1.js"></script>
+<script type="text/javascript">
+	(function(){
+		$(".md-input").on("focus",function(){
+			$(this).parent().addClass('box-focus');
+		})
+
+		$('.md-input').on('blur',function(){
+			$(this).parent().removeClass('box-focus');
+		})
+
+		$("#modal").on("click",function(){
+			$(".modal").addClass("show");
+		})
+	})()
+</script>
+</html>

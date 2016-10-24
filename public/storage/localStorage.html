@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>localStorage</title>
+</head>
+<body>
+	<textarea id='editer'></textarea>
+</body>
+<script type="text/javascript">
+	(function(){
+		var editer = document.getElementById('editer');
+		//刷新关闭
+		window.onbeforeunload = function(){
+			debugger;
+			if(window.localStorage){
+				localStorage.setItem('editer-item',editer.value);
+			}
+			
+		}
+
+		window.onload =function(){
+			if(window.localStorage){
+				editer.value = localStorage.getItem('editer-item');
+			}
+			
+		}
+	})()
+</script>
+</html>

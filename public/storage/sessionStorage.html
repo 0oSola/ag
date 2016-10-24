@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>sessionStorage</title>
+</head>
+<body>
+	<textarea id="editor"></textarea>
+	<button id="save">save</button>
+	<button id="read">read</button>
+</body>
+<script type="text/javascript">
+	(function(){
+		var editor = document.getElementById('editor');
+		var idx = 0;
+		document.getElementById('save').onclick=function(){
+			if(window.sessionStorage){
+				sessionStorage.setItem(idx,editor.value);
+				idx++;
+			}
+		}
+		document.getElementById('read').onclick = function(){
+			if(window.sessionStorage){
+				for(var i=0;i<sessionStorage.length;i++)
+				console.log(i+':'+sessionStorage.getItem(i));
+			}
+		}
+	})()
+</script>
+</html>
